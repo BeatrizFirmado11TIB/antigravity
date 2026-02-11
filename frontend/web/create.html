@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Produto - BluCore</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .form-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .form-feedback.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            opacity: 1;
+        }
+
+        .form-feedback.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <h1>BluCore</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="create.html" class="active">Cadastrar Produto</a></li>
+                    <li><a href="list.html">Ver Produtos</a></li>
+                </ul>
+                <button id="theme-toggle" class="theme-toggle" aria-label="Alternar Tema">🌓</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="form-container">
+            <h2>Novo Produto</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="name">Nome do Produto</label>
+                    <input type="text" id="name" name="name" required placeholder="Ex: Câmera Digital">
+                </div>
+                <div class="form-group">
+                    <label for="category">Categoria</label>
+                    <input type="text" id="category" name="category" required placeholder="Ex: Eletrônicos">
+                </div>
+                <div class="form-group">
+                    <label for="price">Preço (R$)</label>
+                    <input type="number" id="price" name="price" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail de Contato</label>
+                    <input type="email" id="email" name="email" required placeholder="contato@exemplo.com">
+                </div>
+                <div class="form-group">
+                    <label for="description">Descrição</label>
+                    <textarea id="description" name="description" rows="4"
+                        placeholder="Detalhes do produto..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Salvar Produto</button>
+                <div id="feedback" class="form-feedback"></div>
+            </form>
+        </section>
+    </main>
+
+    <script src="backend/script.js"></script>
+    <script>
+        const form = document.getElementById('productForm');
+        const feedback = document.getElementById('feedback');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('http://localhost:5501/products_firmado', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    feedback.textContent = 'Produto cadastrado com sucesso! Redirecionando...';
+                    feedback.className = 'form-feedback success';
+                    setTimeout(() => {
+                        window.location.href = 'list.html';
+                    }, 2000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Erro ao cadastrar');
+                }
+            } catch (err) {
+                feedback.textContent = err.message;
+                feedback.className = 'form-feedback error';
+            }
+        });
+    </script>
+</body>
+
+</html>
