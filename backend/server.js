@@ -48,7 +48,7 @@ app.post('/products_firmado', (req, res) => {
   })
 })
 app.get('/products_firmado', (req, res) => {
-  const query = 'SELECT name, price, description, category FROM products_firmado'
+  const query = 'SELECT id, name, price, description, category FROM products_firmado'
 
   connection.query(query, (err, results) => {
     if (err) {
@@ -61,6 +61,29 @@ app.get('/products_firmado', (req, res) => {
     }
 
     res.status(200).json(results)
+  })
+})
+
+app.delete('/products_firmado/:id', (req, res) => {
+  const { id } = req.params
+  const query = 'DELETE FROM products_firmado WHERE id = ?'
+
+  connection.query(query, [id], (err, results) => {
+    if (err) {
+      console.error('Erro ao deletar produto:', err)
+      res.status(500).json({
+        message: 'Erro ao deletar produto',
+        error: err
+      })
+      return
+    }
+
+    if (results.affectedRows === 0) {
+      res.status(404).json({ message: 'Produto não encontrado' })
+      return
+    }
+
+    res.status(200).json({ message: 'Produto deletado com sucesso' })
   })
 })
 

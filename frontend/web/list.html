@@ -81,11 +81,13 @@
                 products.forEach(product => {
                     const card = document.createElement('div');
                     card.className = 'card product-card';
+                    card.id = `product-${product.id}`;
                     card.innerHTML = `
                         <span class="category-badge">${product.category}</span>
                         <h3>${product.name}</h3>
                         <div class="price-tag">R$ ${parseFloat(product.price).toFixed(2)}</div>
                         <p class="product-description">${product.description}</p>
+                        <button class="delete-btn" onclick="deleteProduct(${product.id})">Apagar</button>
                     `;
                     grid.appendChild(card);
                 });
@@ -94,6 +96,33 @@
                 loading.innerHTML = '<p class="error">Erro ao carregar produtos. Verifique se o servidor está rodando.</p>';
             }
         };
+
+        async function deleteProduct(id) {
+            if (confirm('Tem certeza que deseja apagar este produto?')) {
+                try {
+                    const response = await fetch(`http://localhost:5501/products_firmado/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Produto apagado com sucesso!');
+                        // Remove o card da tela
+                        const card = document.getElementById(`product-${id}`);
+                        if (card) card.remove();
+
+                        // Opcional: Recarregar se não houver mais produtos
+                        if (grid.children.length === 0) {
+                            grid.innerHTML = '<div class="empty-message"><h2>📦</h2><p>Nenhum produto cadastrado.</p></div>';
+                        }
+                    } else {
+                        alert('Erro ao apagar o produto no banco de dados.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Erro de conexão com o servidor.');
+                }
+            }
+        }
     </script>
 </body>
 
